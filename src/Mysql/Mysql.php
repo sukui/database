@@ -41,6 +41,7 @@ class Mysql implements DriverInterface, Async
      * @var Tracer
      */
     private $debuggerTrace;
+    private $debuggerTid;
 
     private $countAlias;
 
@@ -94,10 +95,9 @@ class Mysql implements DriverInterface, Async
 
         $debuggerTrace = (yield getContext("debugger_trace"));
         if ($debuggerTrace instanceof Tracer) {
-            $req = ["sql" => $sql];
             $conf = $this->connection->getConfig();
             $dsn = "mysql:host={$conf["host"]};port={$conf["port"]};dbname={$conf["database"]}";
-            $debuggerTrace->beginTransaction(Constant::SQL, $sql, $dsn);
+            $this->debuggerTid = $debuggerTrace->beginTransaction(Constant::SQL, $sql, $dsn);
             $this->debuggerTrace = $debuggerTrace;
         }
 
@@ -164,14 +164,14 @@ class Mysql implements DriverInterface, Async
                 $this->trace->commit($this->traceHandle, $exception->getTraceAsString());
             }
             if ($this->debuggerTrace) {
-                $this->debuggerTrace->commit("error", $exception);
+                $this->debuggerTrace->commit($this->debuggerTid, "error", $exception);
             }
         } else {
             if ($this->trace) {
                 $this->trace->commit($this->traceHandle, Constant::SUCCESS);
             }
             if ($this->debuggerTrace) {
-                $this->debuggerTrace->commit("info", $result);
+                $this->debuggerTrace->commit($this->debuggerTid, "info", $result);
             }
         }
 
@@ -204,7 +204,7 @@ class Mysql implements DriverInterface, Async
                 $this->trace->commit($this->traceHandle, "$type timeout");
             }
             if ($this->debuggerTrace) {
-                $this->debuggerTrace->commit("warn", "$type timeout");
+                $this->debuggerTrace->commit($this->debuggerTid,"warn", "$type timeout");
             }
 
             if ($this->callback) {
