@@ -5,6 +5,7 @@ namespace ZanPHP\Database;
 use SplStack;
 use ZanPHP\Contracts\Config\Repository;
 use ZanPHP\Contracts\ConnectionPool\Connection;
+use ZanPHP\Contracts\ConnectionPool\ConnectionManager;
 use ZanPHP\Database\Exception\CanNotFindDatabaseEngineException;
 use ZanPHP\Database\Exception\CanNotGetConnectionByConnectionManagerException;
 use ZanPHP\Database\Exception\CanNotGetConnectionByStackException;
@@ -249,7 +250,8 @@ class Flow
 
     private function getConnectionByConnectionManager($database)
     {
-        $connectionManager = make("connectionManager");
+        /** @var ConnectionManager $connectionManager */
+        $connectionManager = make(ConnectionManager::class);
         $connection = (yield $connectionManager->get($database));
         if (!($connection instanceof Connection)) {
             throw new CanNotGetConnectionByConnectionManagerException('get connection error database:'.$database);
