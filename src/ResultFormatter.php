@@ -5,6 +5,7 @@ namespace ZanPHP\Database;
 use ZanPHP\Contracts\Database\DbResultInterface;
 use ZanPHP\Contracts\Database\ResultFormatterInterface;
 use ZanPHP\Contracts\Database\ResultTypeInterface;
+use ZanPHP\Exception\ZanException;
 
 class ResultFormatter implements ResultFormatterInterface
 {
@@ -17,10 +18,15 @@ class ResultFormatter implements ResultFormatterInterface
      * @param DbResultInterface $result
      * @param int $resultType
      */
-    public function __construct(DbResultInterface $result, $resultType = ResultTypeInterface::RAW)
+    public function __construct($result, $resultType = ResultTypeInterface::RAW)
     {
-        $this->dbResult = $result;
-        $this->resultType = $resultType;
+        if ($result instanceof DbResultInterface) {
+            $this->dbResult = $result;
+            $this->resultType = $resultType;
+        } else {
+            sys_error(var_export($result, true));
+            throw new ZanException("dbResult type invalid");
+        }
     }
 
     /**
