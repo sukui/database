@@ -257,6 +257,9 @@ class SqlBuilder
         return $this;
     }
 
+    /**
+     * 解析#DATA#
+     */
     private function parseUpdateData($data)
     {
         if (!$data || !isset($data['data']) || [] == $data['data']) {
