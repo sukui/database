@@ -71,25 +71,8 @@ class SqlBuilder
     private function insert($data)
     {
         $this->parseVars($data);
-        if (isset($data['inserts'])) {
-            return $this->batchInserts($data);
-        }
-        $this->checkInsertRequire($data);
-        $insert = isset($data['insert']) ? $data['insert'] : [];
-        if (!is_array($insert) || count($insert) == 0) {
-            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'insert', '');
-            return $this;
-        }
-
-        $columns = [];
-        $values = [];
-        foreach ($insert as $column => $value) {
-            $columns[] = $this->formatColumn($column);
-            $values[] = $this->formatValue($value);
-        }
-        $replace = '(' . implode(',', $columns) . ') values(';
-        $replace .= implode(',', $values) . ')';
-        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'insert', $replace);
+        $this->parseInsert($data);
+        $this->parseUpdateData($data);
         return $this;
     }
 
@@ -105,7 +88,7 @@ class SqlBuilder
         }
         $insertsArr = [];
         $cloumns = array_keys($inserts[0]);
-        $replace  = '(' . implode(',', $cloumns) . ') values ';
+        $replace = '(' . implode(',', $cloumns) . ') values ';
         foreach ($inserts as $insert) {
             $values = [];
             foreach ($insert as $value) {
@@ -149,7 +132,7 @@ class SqlBuilder
 
     private function formatColumn($column)
     {
-        return '`'. str_replace('.', '`.`', $column) . '`';
+        return '`' . str_replace('.', '`.`', $column) . '`';
     }
 
     private function formatValue($value)
@@ -179,7 +162,7 @@ class SqlBuilder
             return true;
         }
 
-        foreach($where as $row) {
+        foreach ($where as $row) {
             $col = $row[0];
             if (count($requireMap) > 0) {
                 if (isset($requireMap[$col])) {
@@ -188,12 +171,12 @@ class SqlBuilder
             }
             if (count($limitMap) > 0) {
                 if (!isset($limitMap[$col])) {
-                    throw new SqlBuilderException('sql map limit error, your insert column not in limit map:'.$col);
+                    throw new SqlBuilderException('sql map limit error, your insert column not in limit map:' . $col);
                 }
             }
         }
         if (count($requireMap) > 0) {
-            throw new SqlBuilderException('sql map require error, require map need your insert must have the columns:'.implode(', ', array_keys($requireMap)));
+            throw new SqlBuilderException('sql map require error, require map need your insert must have the columns:' . implode(', ', array_keys($requireMap)));
         }
         return true;
     }
@@ -217,7 +200,7 @@ class SqlBuilder
             return true;
         }
 
-        foreach($insert as $column => $value) {
+        foreach ($insert as $column => $value) {
             if (count($requireMap) > 0) {
                 if (isset($requireMap[$column])) {
                     unset($requireMap[$column]);
@@ -225,12 +208,12 @@ class SqlBuilder
             }
             if (count($limitMap) > 0) {
                 if (!isset($limitMap[$column])) {
-                    throw new SqlBuilderException('sql map limit error, your insert column not in limit map:'.$column);
+                    throw new SqlBuilderException('sql map limit error, your insert column not in limit map:' . $column);
                 }
             }
         }
         if (count($requireMap) > 0) {
-            throw new SqlBuilderException('sql map require error, require map need your insert must have the columns:'.implode(', ', array_keys($requireMap)));
+            throw new SqlBuilderException('sql map require error, require map need your insert must have the columns:' . implode(', ', array_keys($requireMap)));
         }
         return true;
     }
@@ -247,6 +230,36 @@ class SqlBuilder
         return $this;
     }
 
+    /**
+     * 解析#INSERT#或#INSERTS#
+     */
+    private function parseInsert($data)
+    {
+        if (isset($data['inserts'])) {
+            return $this->batchInserts($data);
+        }
+        $this->checkInsertRequire($data);
+        $insert = isset($data['insert']) ? $data['insert'] : [];
+        if (!is_array($insert) || count($insert) == 0) {
+            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'insert', '');
+            return $this;
+        }
+
+        $columns = [];
+        $values = [];
+        foreach ($insert as $column => $value) {
+            $columns[] = $this->formatColumn($column);
+            $values[] = $this->formatValue($value);
+        }
+        $replace = '(' . implode(',', $columns) . ') values(';
+        $replace .= implode(',', $values) . ')';
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'insert', $replace);
+        return $this;
+    }
+
+    /**
+     * 解析#DATA#
+     */
     private function parseUpdateData($data)
     {
         if (!$data || !isset($data['data']) || [] == $data['data']) {
@@ -305,7 +318,6 @@ class SqlBuilder
         $this->sqlMap['sql'] = str_replace($secLabels, $replaces, $this->sqlMap['sql']);
         return $this;
     }
-
 
 
     private function parseWhere($data)
@@ -434,7 +446,7 @@ class SqlBuilder
     private function parseLimit($data)
     {
         $this->sqlMap['limit'] = '';
-        if(isset($data['limit']) && '' !== $data['limit']) {
+        if (isset($data['limit']) && '' !== $data['limit']) {
             $this->sqlMap['limit'] = trim($data['limit']);
         }
         if ('' != $this->sqlMap['limit']) {
