@@ -88,6 +88,10 @@ class Mysql implements DriverInterface, Async
      */
     public function query($sql)
     {
+        $value = (yield getContext("service-chain-value"));
+        if (is_array($value) && isset($value["zan_test"]) && $value["zan_test"] === true) {
+            $sql = "/*ctx:shadow*/" . $sql;
+        }
         $this->trace = (yield getContext("trace"));
         if ($this->trace) {
             $this->traceHandle = $this->trace->transactionBegin(Constant::SQL, $sql);
