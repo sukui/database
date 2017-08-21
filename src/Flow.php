@@ -58,7 +58,11 @@ class Flow
             }
         }
 
-        $database = Table::getInstance()->getDatabase($sqlMap['table']);
+        if (isset($sqlMap['database'])) {
+            $database = $sqlMap['database'];
+        } else {
+            $database = Table::getInstance()->getDatabase($sqlMap['table']);
+        }
         $connection = (yield $this->getConnection($database));
         $driver = $this->getDriver($connection);
         try {

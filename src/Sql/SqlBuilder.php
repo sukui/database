@@ -51,6 +51,7 @@ class SqlBuilder
         $this->parseAnds($data);
         $this->parseOr($data);
 
+        $this->parseTable($data);
         $this->parseGroupBy($data);
         $this->parseOrderBy($data);
         $this->parseLimit($data);
@@ -71,6 +72,7 @@ class SqlBuilder
     private function insert($data)
     {
         $this->parseVars($data);
+        $this->parseTable($data);
         $this->parseInsert($data);
         $this->parseUpdateData($data);
         return $this;
@@ -79,6 +81,7 @@ class SqlBuilder
     private function batchInserts($data)
     {
         $inserts = isset($data['inserts']) ? $data['inserts'] : [];
+        $this->parseTable($data);
         if (!is_array($inserts) || count($inserts) == 0) {
             $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'inserts', '');
             return $this;
@@ -110,6 +113,7 @@ class SqlBuilder
         $this->parseAnds($data);
         $this->parseOr($data);
 
+        $this->parseTable($data);
         $this->parseGroupBy($data);
         $this->parseOrderBy($data);
         $this->parseLimit($data);
@@ -124,6 +128,7 @@ class SqlBuilder
         $this->parseAnds($data);
         $this->parseOr($data);
 
+        $this->parseTable($data);
         $this->parseGroupBy($data);
         $this->parseOrderBy($data);
         $this->parseLimit($data);
@@ -401,6 +406,16 @@ class SqlBuilder
         }
         $replace = $this->parseWhereStyleData($andData, 'and');
         $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], $andLabel, $replace);
+        return $this;
+    }
+
+    private function parseTable($data)
+    {
+        $table = '';
+        if (isset($data['table']) && '' !== $data['table']) {
+            $table = trim($data['table']);
+        }
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'table', $table);
         return $this;
     }
 
