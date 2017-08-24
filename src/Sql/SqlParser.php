@@ -39,6 +39,7 @@ class SqlParser
             $map['result_type'] = $this->checkResultType(strtolower($expKey[0]));
             $map['table']= $this->getTable($map);
             $map['sql_type'] = $this->getSqlType($map['sql']);
+            $map['timestamps'] = isset($map['timestamps']) ? $map['timestamps'] : true;
             $this->sqlMap[$key] = $map;
         }
         return $this;
