@@ -90,7 +90,7 @@ class Mysql implements DriverInterface, Async
     {
         $value = (yield getContext("service-chain-value"));
         if (is_array($value) && isset($value["zan_test"]) && $value["zan_test"] === true) {
-            $sql = "/*ctx:shadow*/" . $sql;
+            $sql = "/*!ctx:shadow*/" . $sql;
         }
         $this->trace = (yield getContext("trace"));
         if ($this->trace) {
