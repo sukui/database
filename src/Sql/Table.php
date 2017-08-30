@@ -31,7 +31,7 @@ class Table
     {
         if ([] == $this->tables) {
             /** @var ConfigLoader $configLoader */
-            $configLoader = make("config.loader");
+            $configLoader = make(ConfigLoader::class);
             $tables = $configLoader->loadDistinguishBetweenFolderAndFile(getenv("path.table"));
             if (null == $tables || [] == $tables) {
                 return;

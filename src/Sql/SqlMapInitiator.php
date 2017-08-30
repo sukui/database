@@ -16,7 +16,7 @@ class SqlMapInitiator
             return false;
         }
         /** @var ConfigLoader $configLoader */
-        $configLoader = make("config.loader");
+        $configLoader = make(ConfigLoader::class);
         $sqlMaps = $configLoader->loadDistinguishBetweenFolderAndFile($sqlPath);
         if (null == $sqlMaps || [] == $sqlMaps) {
             return false;
