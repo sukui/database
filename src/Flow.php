@@ -22,7 +22,6 @@ use ZanPHP\Database\Mysql\Mysql;
 use ZanPHP\Database\Mysql\MysqliResult;
 use ZanPHP\Database\Sql\SqlMap;
 use ZanPHP\Database\Sql\Table;
-use ZanPHP\Exception\ZanException;
 use ZanPHP\Support\ObjectArray;
 
 class Flow
@@ -76,13 +75,8 @@ class Flow
             $driver->setCountAlias($sqlMap['count_alias']);
         }
 
-        /**
-         * $dbResult类型错误,直接抛出异常,取消超时,避免超时异常再次抛出
-         */
         if (!($dbResult instanceof DbResultInterface)) {
-            $driver->cancelTimeoutTimer();
-            sys_error(var_export($dbResult, true));
-            throw new ZanException("dbResult type invalid");
+            $driver->onInvalidResult($dbResult);
         }
         $resultFormatter = new ResultFormatter($dbResult, $sqlMap['result_type']);
         $result = (yield $resultFormatter->format());
