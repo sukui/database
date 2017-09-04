@@ -6,6 +6,7 @@ use SplStack;
 use ZanPHP\Contracts\Config\Repository;
 use ZanPHP\Contracts\ConnectionPool\Connection;
 use ZanPHP\Contracts\ConnectionPool\ConnectionManager;
+use ZanPHP\Contracts\Database\DbResultInterface;
 use ZanPHP\Database\Exception\CanNotFindDatabaseEngineException;
 use ZanPHP\Database\Exception\CanNotGetConnectionByConnectionManagerException;
 use ZanPHP\Database\Exception\CanNotGetConnectionByStackException;
@@ -21,6 +22,7 @@ use ZanPHP\Database\Mysql\Mysql;
 use ZanPHP\Database\Mysql\MysqliResult;
 use ZanPHP\Database\Sql\SqlMap;
 use ZanPHP\Database\Sql\Table;
+use ZanPHP\Exception\ZanException;
 use ZanPHP\Support\ObjectArray;
 
 class Flow
@@ -72,6 +74,15 @@ class Flow
         }
         if (isset($sqlMap['count_alias'])) {
             $driver->setCountAlias($sqlMap['count_alias']);
+        }
+
+        /**
+         * $dbResult类型错误,直接抛出异常,取消超时,避免超时异常再次抛出
+         */
+        if (!($dbResult instanceof DbResultInterface)) {
+            $driver->cancelTimeoutTimer();
+            sys_error(var_export($dbResult, true));
+            throw new ZanException("dbResult type invalid");
         }
         $resultFormatter = new ResultFormatter($dbResult, $sqlMap['result_type']);
         $result = (yield $resultFormatter->format());

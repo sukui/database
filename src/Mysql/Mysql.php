@@ -195,7 +195,7 @@ class Mysql implements DriverInterface, Async
         Timer::after($timeout, $this->onQueryTimeout($this->sql, $type), spl_object_hash($this));
     }
 
-    private function cancelTimeoutTimer()
+    public function cancelTimeoutTimer()
     {
         Timer::clearAfterJob(spl_object_hash($this));
     }
