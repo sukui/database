@@ -188,8 +188,8 @@ class Mysql implements DriverInterface, Async
 
         if ($this->callback) {
             $callback = $this->callback;
-            $callback(new MysqliResult($this), $exception);
             $this->callback = null;
+            $callback(new MysqliResult($this), $exception);
         }
     }
 
@@ -223,10 +223,9 @@ class Mysql implements DriverInterface, Async
                     "duration" => $duration,
                 ];
                 $callback = $this->callback;
+                $this->callback = null;
                 $ex = new MysqliQueryTimeoutException("Mysql $type timeout [sql=$sql, duration=$duration]", 0, null, $ctx);
                 $callback(null, $ex);
-
-                $this->callback = null;
             }
         };
     }
