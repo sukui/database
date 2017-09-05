@@ -1,46 +1,36 @@
 <?php
+
 namespace Zan\Framework\Store\Database\Mysql;
 
-use Zan\Framework\Contract\Store\Database\DbResultInterface;
-use Zan\Framework\Contract\Store\Database\DriverInterface;
+use ZanPHP\Contracts\Database\DbResultInterface;
+use ZanPHP\Contracts\Database\DriverInterface;
 
 class MysqliResult implements DbResultInterface
 {
-    /**
-     * FutureResult constructor.
-     * @param DriverInterface $driver
-     */
+    private $MysqliResult;
+
     public function __construct(DriverInterface $driver)
     {
-
+        $this->MysqliResult = new \ZanPHP\Database\Mysql\MysqliResult($driver);
     }
 
-    /**
-     * @return int
-     */
     public function getLastInsertId()
     {
-
+        $this->MysqliResult->getLastInsertId();
     }
 
-    /**
-     * @return int
-     */
     public function getAffectedRows()
     {
-
+        $this->MysqliResult->getAffectedRows();
     }
 
-    /**
-     * @return array
-     */
     public function fetchRows()
     {
-
+        $this->MysqliResult->fetchRows();
     }
 
     public function getCountRows()
     {
-
+        $this->MysqliResult->getCountRows();
     }
 }
