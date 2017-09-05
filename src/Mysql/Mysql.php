@@ -13,6 +13,7 @@ use ZanPHP\Database\Mysql\Exception\MysqliQueryDuplicateEntryUniqueKeyException;
 use ZanPHP\Database\Mysql\Exception\MysqliQueryException;
 use ZanPHP\Database\Mysql\Exception\MysqliQueryTimeoutException;
 use ZanPHP\Database\Mysql\Exception\MysqliSqlSyntaxException;
+use ZanPHP\Exception\ZanException;
 use ZanPHP\Timer\Timer;
 
 class Mysql implements DriverInterface, Async
@@ -88,6 +89,10 @@ class Mysql implements DriverInterface, Async
      */
     public function query($sql)
     {
+        $value = (yield getContext("service-chain-value"));
+        if (is_array($value) && isset($value["zan_test"]) && $value["zan_test"] === true) {
+            $sql = "/*!ctx:shadow*/" . $sql;
+        }
         $this->trace = (yield getContext("trace"));
         if ($this->trace) {
             $this->traceHandle = $this->trace->transactionBegin(Constant::SQL, $sql);
@@ -218,5 +223,18 @@ class Mysql implements DriverInterface, Async
                 $callback(null, $ex);
             }
         };
+    }
+
+    /**
+     * $dbResult类型错误,直接抛出异常,取消超时,避免超时异常再次抛出
+     */
+    public function onInvalidResult($dbResult)
+    {
+        $ctx = [
+            "sql" => $this->sql,
+        ];
+        $this->cancelTimeoutTimer();
+        sys_error(var_export($dbResult, true));
+        throw new MysqliQueryException("dbResult type invalid [sql={$this->sql}]", 0, null, $ctx);
     }
 }
