@@ -2,79 +2,67 @@
 
 namespace Zan\Framework\Store\Database\Mysql;
 
-use Zan\Framework\Contract\Store\Database\DbResultInterface;
-use Zan\Framework\Contract\Store\Database\DriverInterface;
-use Zan\Framework\Contract\Network\Connection;
-use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryException;
+use ZanPHP\Contracts\ConnectionPool\Connection;
+use ZanPHP\Contracts\Database\DriverInterface;
 use ZanPHP\Coroutine\Contract\Async;
 
 
 class Mysql implements DriverInterface, Async
 {
-    const DEFAULT_QUERY_TIMEOUT = 3000;
+    private $Mysql;
+
+    public function __construct(Connection $connection)
+    {
+        $this->Mysql = new \ZanPHP\Database\Mysql\Mysql($connection);
+    }
 
     public function getConnection()
     {
-
+        $this->Mysql->getConnection();
     }
 
     public function setCountAlias($countAlias)
     {
-
+        $this->Mysql->setCountAlias($countAlias);
     }
 
     public function getCountAlias()
     {
-
+        $this->Mysql->getCountAlias();
     }
 
     public function getResult()
     {
-
+        $this->Mysql->getResult();
     }
 
     public function execute(callable $callback, $task)
     {
-
+        $this->Mysql->execute($callback, $task);
     }
 
-    /**
-     * @param $sql
-     * @return \Generator
-     * @throws MysqliQueryException
-     */
     public function query($sql)
     {
-
+        $this->Mysql->query($sql);
     }
 
     public function beginTransaction($flags = 0)
     {
-
+        $this->Mysql->beginTransaction($flags);
     }
 
     public function commit($flags = 0)
     {
-
+        $this->Mysql->commit($flags);
     }
 
     public function rollback($flags = 0)
     {
-
+        $this->Mysql->rollback($flags);
     }
 
-    public function __construct(Connection $conn)
-    {
-
-    }
-
-    /**
-     * @param $link
-     * @param $result
-     * @return DbResultInterface
-     */
     public function onSqlReady($link, $result)
     {
-        // TODO: Implement onSqlReady() method.
+        $this->Mysql->onSqlReady($link, $result);
     }
 }

@@ -1,27 +1,21 @@
 <?php
 namespace Zan\Framework\Store\Database;
 
-use Zan\Framework\Contract\Store\Database\ResultFormatterInterface;
-use Zan\Framework\Contract\Store\Database\DbResultInterface;
-use Zan\Framework\Contract\Store\Database\ResultTypeInterface;
+use ZanPHP\Contracts\Database\DbResultInterface;
+use ZanPHP\Contracts\Database\ResultFormatterInterface;
+use ZanPHP\Contracts\Database\ResultTypeInterface;
 
 class ResultFormatter implements ResultFormatterInterface
 {
-    /**
-     * ResultFormatterInterface constructor.
-     * @param DbResultInterface $result
-     * @param int $resultType
-     */
+    private $ResultFormatter;
+
     public function __construct(DbResultInterface $result, $resultType = ResultTypeInterface::RAW)
     {
-
+        $this->ResultFormatter = new \ZanPHP\Database\ResultFormatter($result, $resultType);
     }
 
-    /**
-     * @yield mixed(base on ResultType)
-     */
     public function format()
     {
-
+        $this->ResultFormatter->format();
     }
 }
