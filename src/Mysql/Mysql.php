@@ -142,6 +142,10 @@ class Mysql implements DriverInterface, Async
      */
     public function onSqlReady($link, $result = true)
     {
+        if($this->callback == null) {
+            return;
+        }
+
         $this->cancelTimeoutTimer();
 
         $exception = null;
@@ -221,6 +225,8 @@ class Mysql implements DriverInterface, Async
                 $callback = $this->callback;
                 $ex = new MysqliQueryTimeoutException("Mysql $type timeout [sql=$sql, duration=$duration]", 0, null, $ctx);
                 $callback(null, $ex);
+
+                $this->callback = null;
             }
         };
     }
