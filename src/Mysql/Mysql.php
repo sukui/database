@@ -88,19 +88,6 @@ class Mysql implements DriverInterface, Async
      */
     public function query($sql)
     {
-        $this->trace = (yield getContext("trace"));
-        if ($this->trace) {
-            $this->traceHandle = $this->trace->transactionBegin(Constant::SQL, $sql);
-        }
-
-        $debuggerTrace = (yield getContext("debugger_trace"));
-        if ($debuggerTrace instanceof Tracer) {
-            $conf = $this->connection->getConfig();
-            $dsn = "mysql:host={$conf["host"]};port={$conf["port"]};dbname={$conf["database"]}";
-            $this->debuggerTid = $debuggerTrace->beginTransaction(Constant::SQL, $sql, $dsn);
-            $this->debuggerTrace = $debuggerTrace;
-        }
-
         $this->sql = $sql;
         $r = $this->swooleMysql->query($this->sql, [$this, "onSqlReady"]);
         if ($r === false) {
@@ -160,19 +147,6 @@ class Mysql implements DriverInterface, Async
                 $exception = new MysqliQueryException("errno=$errno&error=$error:$this->sql", 0, null, $ctx);
             }
 
-            if ($this->trace) {
-                $this->trace->commit($this->traceHandle, $exception->getTraceAsString());
-            }
-            if ($this->debuggerTrace) {
-                $this->debuggerTrace->commit($this->debuggerTid, "error", $exception);
-            }
-        } else {
-            if ($this->trace) {
-                $this->trace->commit($this->traceHandle, Constant::SUCCESS);
-            }
-            if ($this->debuggerTrace) {
-                $this->debuggerTrace->commit($this->debuggerTid, "info", $result);
-            }
         }
 
         $this->result = $result;

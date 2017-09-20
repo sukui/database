@@ -6,6 +6,7 @@ use SplStack;
 use ZanPHP\Contracts\Config\Repository;
 use ZanPHP\Contracts\ConnectionPool\Connection;
 use ZanPHP\Contracts\ConnectionPool\ConnectionManager;
+use ZanPHP\Contracts\Trace\Constant;
 use ZanPHP\Database\Exception\CanNotFindDatabaseEngineException;
 use ZanPHP\Database\Exception\CanNotGetConnectionByConnectionManagerException;
 use ZanPHP\Database\Exception\CanNotGetConnectionByStackException;
@@ -46,9 +47,22 @@ class Flow
         'Mysqli' => Mysql::class,
     ];
 
+    /**
+     * @var Trace
+     */
+    private $trace;
+    private $traceHandle;
+
     public function query($sid, $data, $options)
     {
         $sqlMap = SqlMap::getInstance()->getSql($sid, $data, $options);
+
+        $this->trace = (yield getContext("trace"));
+        if ($this->trace) {
+            $this->traceHandle = $this->trace->transactionBegin(Constant::SQL, $sid);
+            $this->trace->logEvent(Constant::SQL.".Method",Constant::SUCCESS,strtolower($sqlMap['sql_type']));
+        }
+
         $repository = make(Repository::class);
         $sqlLog = $repository->get("monitor.sql");
         if ($repository->get('debug') && is_array($sqlLog) && isset($sqlLog['path'])) {
@@ -69,10 +83,19 @@ class Flow
             $dbResult = (yield $driver->query($sqlMap['sql']));
         } catch (\Throwable $t) {
             yield $this->queryException($t, $connection);
+            if($this->trace){
+                $this->trace->commit($this->traceHandle, $t->getTraceAsString(), $sqlMap['sql']);
+            }
             throw $t;
         } catch (\Exception $e) {
             yield $this->queryException($e, $connection);
+            if($this->trace){
+                $this->trace->commit($this->traceHandle, $e->getTraceAsString(), $sqlMap['sql']);
+            }
             throw $e;
+        }
+        if($this->trace){
+            $this->trace->commit($this->traceHandle,Constant::SUCCESS, $sqlMap['sql']);
         }
         if (isset($sqlMap['count_alias'])) {
             $driver->setCountAlias($sqlMap['count_alias']);
@@ -85,6 +108,12 @@ class Flow
 
     public function queryRaw($table, $sql)
     {
+        $this->trace = (yield getContext("trace"));
+        if ($this->trace) {
+            $this->traceHandle = $this->trace->transactionBegin(Constant::SQL, "rawQuery");
+            $type = explode(" ",$sql);
+            $this->trace->logEvent(Constant::SQL.".Method",Constant::SUCCESS,strtolower($type[0]));
+        }
         $repository = make(Repository::class);
         $sqlLog = $repository->get("monitor.sql");
         if ($repository->get('debug') && is_array($sqlLog) && isset($sqlLog['path'])) {
@@ -99,10 +128,19 @@ class Flow
             $dbResult = (yield $driver->query($sql));
         }  catch (\Throwable $t) {
             yield $this->queryException($t, $connection);
+            if($this->trace){
+                $this->trace->commit($this->traceHandle, $t->getTraceAsString(), $sql);
+            }
             throw $t;
         } catch (\Exception $e) {
             yield $this->queryException($e, $connection);
+            if($this->trace){
+                $this->trace->commit($this->traceHandle, $e->getTraceAsString(), $sql);
+            }
             throw $e;
+        }
+        if($this->trace){
+            $this->trace->commit($this->traceHandle,Constant::SUCCESS, $sql);
         }
         yield $this->releaseConnection($connection);
         yield $dbResult;
