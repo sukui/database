@@ -5,7 +5,6 @@ namespace ZanPHP\Database\Mysql;
 use ZanPHP\Contracts\ConnectionPool\Connection;
 use ZanPHP\Contracts\Database\DriverInterface;
 use ZanPHP\Contracts\Debugger\Tracer;
-use ZanPHP\Contracts\Trace\Constant;
 use ZanPHP\Contracts\Trace\Trace;
 use ZanPHP\Coroutine\Contract\Async;
 use ZanPHP\Database\Mysql\Exception\MysqliConnectionLostException;
@@ -13,7 +12,6 @@ use ZanPHP\Database\Mysql\Exception\MysqliQueryDuplicateEntryUniqueKeyException;
 use ZanPHP\Database\Mysql\Exception\MysqliQueryException;
 use ZanPHP\Database\Mysql\Exception\MysqliQueryTimeoutException;
 use ZanPHP\Database\Mysql\Exception\MysqliSqlSyntaxException;
-use ZanPHP\Exception\ZanException;
 use ZanPHP\Timer\Timer;
 
 class Mysql implements DriverInterface, Async
