@@ -13,6 +13,7 @@ use ZanPHP\Database\Mysql\Exception\MysqliQueryDuplicateEntryUniqueKeyException;
 use ZanPHP\Database\Mysql\Exception\MysqliQueryException;
 use ZanPHP\Database\Mysql\Exception\MysqliQueryTimeoutException;
 use ZanPHP\Database\Mysql\Exception\MysqliSqlSyntaxException;
+use ZanPHP\Exception\ZanException;
 use ZanPHP\Timer\Timer;
 
 class Mysql implements DriverInterface, Async
@@ -88,6 +89,12 @@ class Mysql implements DriverInterface, Async
      */
     public function query($sql)
     {
+
+        $value = (yield getContext("service-chain-value"));
+        if (is_array($value) && isset($value["zan_test"]) && $value["zan_test"] === true) {
+            $sql = "/*!ctx:shadow*/" . $sql;
+        }
+
         $this->sql = $sql;
         $r = $this->swooleMysql->query($this->sql, [$this, "onSqlReady"]);
         if ($r === false) {
@@ -124,6 +131,10 @@ class Mysql implements DriverInterface, Async
      */
     public function onSqlReady($link, $result = true)
     {
+        if($this->callback == null) {
+            return;
+        }
+
         $this->cancelTimeoutTimer();
 
         $exception = null;
@@ -153,8 +164,8 @@ class Mysql implements DriverInterface, Async
 
         if ($this->callback) {
             $callback = $this->callback;
-            $callback(new MysqliResult($this), $exception);
             $this->callback = null;
+            $callback(new MysqliResult($this), $exception);
         }
     }
 
@@ -188,9 +199,23 @@ class Mysql implements DriverInterface, Async
                     "duration" => $duration,
                 ];
                 $callback = $this->callback;
+                $this->callback = null;
                 $ex = new MysqliQueryTimeoutException("Mysql $type timeout [sql=$sql, duration=$duration]", 0, null, $ctx);
                 $callback(null, $ex);
             }
         };
+    }
+
+    /**
+     * $dbResult类型错误,直接抛出异常,取消超时,避免超时异常再次抛出
+     */
+    public function onInvalidResult($dbResult)
+    {
+        $ctx = [
+            "sql" => $this->sql,
+        ];
+        $this->cancelTimeoutTimer();
+        sys_error(var_export($dbResult, true));
+        throw new MysqliQueryException("dbResult type invalid [sql={$this->sql}]", 0, null, $ctx);
     }
 }

@@ -7,6 +7,7 @@ use ZanPHP\Contracts\Config\Repository;
 use ZanPHP\Contracts\ConnectionPool\Connection;
 use ZanPHP\Contracts\ConnectionPool\ConnectionManager;
 use ZanPHP\Contracts\Trace\Constant;
+use ZanPHP\Contracts\Database\DbResultInterface;
 use ZanPHP\Database\Exception\CanNotFindDatabaseEngineException;
 use ZanPHP\Database\Exception\CanNotGetConnectionByConnectionManagerException;
 use ZanPHP\Database\Exception\CanNotGetConnectionByStackException;
@@ -99,6 +100,10 @@ class Flow
         }
         if (isset($sqlMap['count_alias'])) {
             $driver->setCountAlias($sqlMap['count_alias']);
+        }
+
+        if (!($dbResult instanceof DbResultInterface)) {
+            $driver->onInvalidResult($dbResult);
         }
         $resultFormatter = new ResultFormatter($dbResult, $sqlMap['result_type']);
         $result = (yield $resultFormatter->format());
