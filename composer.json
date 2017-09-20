@@ -8,7 +8,7 @@
   },
   "require": {
     "php": ">=5.6",
-    "zanphp/coroutine": "dev-master",
+    "zanphp/coroutine": "dev-laogui",
     "zanphp/contracts": "dev-master",
     "zanphp/timer": "dev-master",
     "zanphp/exception": "dev-master",
