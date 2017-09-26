@@ -35,7 +35,12 @@ class SqlBuilder
                 $this->delete($data);
                 break;
         }
-        $this->addSqlLint($options)->formatSql();
+        $result = $this->addSqlLint($options);
+        if (isset($options['format_sql']) && $options['format_sql'] === false) {
+            return $this;
+        }
+        $result->formatSql();
+
         return $this;
     }
 
