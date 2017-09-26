@@ -61,7 +61,7 @@ class Flow
         $this->trace = (yield getContext("trace"));
         if ($this->trace) {
             $this->traceHandle = $this->trace->transactionBegin(Constant::SQL, $sid);
-            $this->trace->logEvent(Constant::SQL.".Method",Constant::SUCCESS,strtolower($sqlMap['sql_type']));
+            $this->trace->logEvent(Constant::SQL.".Method",Constant::SUCCESS,strtoupper($sqlMap['sql_type']));
         }
 
         $repository = make(Repository::class);
