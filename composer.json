@@ -12,11 +12,20 @@
     "zanphp/contracts": "dev-master",
     "zanphp/timer": "dev-master",
     "zanphp/exception": "dev-master",
-    "zanphp/support": "dev-master"
+    "zanphp/support": "dev-master",
+    "zanphp/connection-pool": "dev-master",
+    "zanphp/spi":"dev-master",
+    "zanphp/config":"dev-master",
+    "zanphp/testing": "dev-master"
   },
   "autoload": {
     "psr-4": {
-      "ZanPHP\\Database\\": "src/"
+      "ZanPHP\\Database\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "ZanPHP\\Database\\Tests\\": "tests"
     }
   },
   "extra": {
