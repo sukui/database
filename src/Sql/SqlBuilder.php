@@ -7,6 +7,7 @@ use ZanPHP\Database\Sql\Exception\SqlBuilderException;
 class SqlBuilder
 {
     private $sqlMap;
+    private $options;
 
     public function setSqlMap($sqlMap)
     {
@@ -21,6 +22,7 @@ class SqlBuilder
 
     public function builder($data, $options)
     {
+        $this->options = $options;
         switch ($this->sqlMap['sql_type']) {
             case 'select' :
                 $this->select($data);
@@ -333,6 +335,10 @@ class SqlBuilder
             return $this;
         }
         $parseWhere = $this->parseWhereStyleData($where, 'and');
+        if (isset($this->options["ignore_where_match"]) && $this->options["ignore_where_match"] === true) {
+            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'where', $parseWhere);
+            return $this;
+        }
         preg_match('/where([^#]*)#where#/i', $this->sqlMap['sql'], $match);
         if (isset($match[1])) {
             if ('' != trim($match[1])) {
