@@ -97,12 +97,12 @@ class SqlBuilder
             $this->checkInsertRequire(['insert' => $insert]);
         }
         $insertsArr = [];
-        $cloumns = array_keys($inserts[0]);
+        $columns = array_keys($inserts[0]);
 
         $rawMap = [];
         if(!empty($this->sqlMap['raw'])){
-            foreach ($cloumns as $key => $cloumn){
-                if(in_array($cloumn,$this->sqlMap['raw'])){
+            foreach ($columns as $key => $column){
+                if(in_array($column,$this->sqlMap['raw'])){
                     $rawMap[$key] = true;
                 }else{
                     $rawMap[$key] = false;
@@ -111,11 +111,11 @@ class SqlBuilder
         }
 
         if ($this->sqlMap['timestamps']) {
-            $cloumns[] = 'created_at';
-            $cloumns[] = 'updated_at';
+            $columns[] = 'created_at';
+            $columns[] = 'updated_at';
         }
 
-        $replace = '(' . implode(',', $cloumns) . ') values ';
+        $replace = '(' . implode(',', $columns) . ') values ';
         foreach ($inserts as $insert) {
             $values = [];
             foreach ($insert as $key => $value) {
