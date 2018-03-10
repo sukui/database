@@ -277,7 +277,11 @@ class SqlBuilder
         $values = [];
         foreach ($insert as $column => $value) {
             $columns[] = $this->formatColumn($column);
-            $values[] = $this->formatValue($value);
+            if(!empty($this->sqlMap['raw']) && in_array($column,$this->sqlMap['raw'])){
+                $values[] = $value;
+            }else{
+                $values[] = $this->formatValue($value);
+            }
         }
         $replace = '(' . implode(',', $columns) . ') values(';
         $replace .= implode(',', $values) . ')';
