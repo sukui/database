@@ -99,6 +99,17 @@ class SqlBuilder
         $insertsArr = [];
         $cloumns = array_keys($inserts[0]);
 
+        $rawMap = [];
+        if(!empty($this->sqlMap['raw'])){
+            foreach ($cloumns as $key => $cloumn){
+                if(in_array($cloumn,$this->sqlMap['raw'])){
+                    $rawMap[$key] = true;
+                }else{
+                    $rawMap[$key] = false;
+                }
+            }
+        }
+
         if ($this->sqlMap['timestamps']) {
             $cloumns[] = 'created_at';
             $cloumns[] = 'updated_at';
@@ -107,8 +118,8 @@ class SqlBuilder
         $replace = '(' . implode(',', $cloumns) . ') values ';
         foreach ($inserts as $insert) {
             $values = [];
-            foreach ($insert as $value) {
-                $values[] = $this->formatValue($value);
+            foreach ($insert as $key => $value) {
+                $values[] = $rawMap[$key]?$value:$this->formatValue($value);
             }
 
             if ($this->sqlMap['timestamps']) {
@@ -318,13 +329,13 @@ class SqlBuilder
 
         $clauses = [];
         foreach ($update as $row) {
-            $expr = false;
-            if (isset($row[2]) && '' != $row[2]) {
-                $expr = $row[2];
-            }
             list($column, $value) = $row;
             $clause = ' ' . $this->formatColumn($column);
-            $clause .= false === $expr ? " = '" . $value . "'" : " = " . $expr . " ";
+            if(!empty($this->sqlMap['raw']) && in_array($column,$this->sqlMap['raw'])){
+                $clause .= " = " . $value . " ";
+            }else{
+                $clause .=  " = '" . $value . "'";
+            }
             $clauses[] = $clause;
         }
         $replace = implode(',', $clauses);
