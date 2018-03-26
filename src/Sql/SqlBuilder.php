@@ -119,7 +119,7 @@ class SqlBuilder
         foreach ($inserts as $insert) {
             $values = [];
             foreach ($insert as $key => $value) {
-                $values[] = $rawMap[$key]?$value:$this->formatValue($value);
+                $values[] = isset($rawMap[$key])?$value:$this->formatValue($value);
             }
 
             if ($this->sqlMap['timestamps']) {
