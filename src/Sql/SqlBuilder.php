@@ -314,7 +314,11 @@ class SqlBuilder
         if (!isset($update[0])) {
             $tmp = [];
             foreach ($update as $column => $value) {
-                $tmp[] = [$column, Validator::realEscape($value)];
+                if(!empty($this->sqlMap['raw']) && in_array($column,$this->sqlMap['raw'])){
+                    $tmp[] = [$column, $value];
+                }else{
+                    $tmp[] = [$column, Validator::realEscape($value)];
+                }
             }
             $update = $tmp;
         }
