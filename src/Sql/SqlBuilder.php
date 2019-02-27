@@ -455,6 +455,12 @@ class SqlBuilder
             return $this;
         }
         $replace = $this->parseWhereStyleData($andData, 'and');
+        preg_match("/where([^#]*)#$andLabel#/i", $this->sqlMap['sql'], $match);
+        if (isset($match[1])) {
+            if ('' != trim($match[1])) {
+                $replace = ' and ' . $replace;
+            }
+        }
         $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], $andLabel, $replace);
         return $this;
     }
@@ -477,6 +483,12 @@ class SqlBuilder
             return $this;
         }
         $replace = $this->parseWhereStyleData($or, 'or');
+        preg_match('/where([^#]*)#or#/i', $this->sqlMap['sql'], $match);
+        if (isset($match[1])) {
+            if ('' != trim($match[1])) {
+                $replace = ' and ' . $replace;
+            }
+        }
         $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'or', trim($replace, ' or'));
         return $this;
     }
